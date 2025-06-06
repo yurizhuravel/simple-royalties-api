@@ -1,0 +1,14 @@
+# Project exclude paths
+target/
+out/
+.vscode/
+metals.sbt
+
+.ammonite
+.idea
+.metals
+.bloop
+.bsp
+.env
+
+.scala-build
