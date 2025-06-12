@@ -66,11 +66,15 @@ on the amount spent. The commission is calculated at the following rates:
 | 3 000 - 1 000 000 | 1%   |
 
 
-The service is built and run with `sbt`, which you can get [here](https://www.scala-sbt.org/). Once installed, test the service with 
+The service is built and run with `sbt`, which you can get [here](https://www.scala-sbt.org/).
+
+After installing `sbt` and checking out this repository, you can run the tests and the service as follows from the project root:
+
+To test the service:
 
 `sbt test`
 
-or run the service with 
+To run the service: 
 
 `sbt run`
 
@@ -132,13 +136,13 @@ Expected response for the sample JSON would be:
 
 For MVP purposes, the server does not handle the result in any meaningful way, i.e. persisting to a DB or notifying downstream. The `clientID` and the total amount of commissions payable to that client, however, are logged.
 
-To test the API locally, you can use your favourite HTTP client with JSON in the body as described above, or try a `curl` request:
+To test the API locally, start the service and use your favourite HTTP client with JSON in the body as described above, or try a `curl` request in a separate terminal:
 
 ```
 curl -X POST http://localhost:8080/api/commissions \
 -H "Content-Type: application/json" \
 -d '{
-"clientId": "Ed Sheeran",
+"clientId": "The Beatles",
 "serviceCosts": [
 {"serviceId": 1, "amount": 900},
 {"serviceId": 2, "amount": 2000},
