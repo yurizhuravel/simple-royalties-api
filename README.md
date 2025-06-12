@@ -90,18 +90,18 @@ TODO for production: env check, base url resolution via `application.conf`
 
 ```
 {
-  "clientID": "client123",
+  "clientId": "client123",
   "serviceCosts": [
     {
-      "serviceID": 1,
+      "serviceId": 1,
       "amount": 900
     },
     {
-      "serviceID": 2,
+      "serviceId": 2,
       "amount": 2000
     },
     {
-      "serviceID": 3,
+      "serviceId": 3,
       "amount": 4000
     }
   ]
