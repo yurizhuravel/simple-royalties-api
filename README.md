@@ -70,7 +70,7 @@ The service is built and run with `sbt`, which you can get [here](https://www.sc
 
 After installing `sbt` and checking out this repository, you can run the tests and the service as follows from the project root:
 
-To test the service:
+To run unit tests:
 
 `sbt test`
 
