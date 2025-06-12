@@ -134,7 +134,7 @@ Expected response for the sample JSON would be:
 ]
 ```
 
-For MVP purposes, the server does not handle the result in any meaningful way, i.e. persisting to a DB or notifying downstream. The `clientID` and the total amount of commissions payable to that client, however, are logged.
+For MVP purposes, the service does not handle the result in a way that could be used by other backend services, i.e. persisting to a DB or notifying downstream. The `clientID` and the total amount of commissions payable to that client, however, are logged to the server console.
 
 To test the API locally, start the service and use your favourite HTTP client with JSON in the body as described above, or try a `curl` request in a separate terminal:
 
