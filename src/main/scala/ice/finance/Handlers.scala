@@ -3,7 +3,9 @@ package ice.finance
 import cats.effect.IO
 import cats.implicits.toTraverseOps
 import org.typelevel.log4cats.Logger
-import ice.finance.ValidationError.*
+import org.http4s.dsl.io.*
+import org.http4s.{Response, MessageFailure}
+import ValidationError.*
 
 object Handlers:
   def calculateRate(amount: Double): Double = amount match
@@ -48,4 +50,13 @@ object Handlers:
           logger.info(s"Successfully processed request from client ${request.clientId}, total commission: $total")
           .as(Right(commissions))
         }
+  
+  def handleClientRequestError(using logger: Logger[IO])(error: Throwable): IO[Response[IO]] = error match
+    case e: MessageFailure =>
+      logger.error(s"Failed to parse client request: ${e.getMessage}") *>
+        BadRequest("Invalid request - please check your request is not malformed and conforms to the format expected by the API")
+    case e =>
+      logger.error(s"Some weirdness happening: ${e.getMessage}") *>
+        InternalServerError("An unexpected error occurred")
+
 end Handlers
