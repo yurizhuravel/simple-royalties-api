@@ -68,11 +68,15 @@ The service is built and run with `sbt`, which you can get [here](https://www.sc
 
 `sbt run`
 
+As this is a sample service, it doesn't do any environment checks on launch, and the base url is hardcoded to `localhost:8080` in `Server.scala`
+
+TODO for production: env check, base url resolution via `application.conf`
+
 ## Endpoints
 
-`/api/health` - health check. Accepts a simple HTTP `GET`
+`/api/health` - health check. Method: `GET`
 
-`/api/commissions` - the main endpoint. Accepts HTTP `POST` requests containing a JSON body in the following format:
+`/api/commissions` - the main endpoint. Method: `POST`, request body must contain JSON in the following format:
 
 ```
 {
@@ -96,9 +100,10 @@ The service is built and run with `sbt`, which you can get [here](https://www.sc
 
 where
 
-- `clientID` is a unique client identifier
-- `serviceID` is an integer identifier of a relevant service provided, and
-- `amount` is a monetary amount payable for this service
+  - `clientID`  is a unique client identifier
+  - `serviceCosts` must be a non-empty list of objects each containing:
+    - `serviceID` an integer identifier of a relevant service provided
+    - `amount` a monetary amount payable for this service (an integer or Double rounded to two decimal positions)
 
 Expected response for the sample JSON would be:
 

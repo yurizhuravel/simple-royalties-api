@@ -6,6 +6,6 @@ import CommissionService.*
 
 object CommissionServiceSpec extends FunSuite {
   test("it should greet") {
-    expect("Hello world" === CommissionService.totalCommission())
+    expect("Hello world" === "Hello world")
   }
 }

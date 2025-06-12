@@ -18,16 +18,16 @@ object CommissionService:
       .toDouble
 
   // Calculate commission for a single service
-  private def calculateCommission(serviceCosts: AmountPerService)(implicit logger: Logger[IO]): IO[AmountPerService] = {
-    val amount = serviceCosts.amount
+  private def calculateCommission(serviceCost: ServiceCost)(implicit logger: Logger[IO]): IO[ServiceCommission] = {
+    val amount = serviceCost.amount
     val commission = toCurrencyFormat(amount * calculateRate(amount))
 
-    IO.pure(AmountPerService(serviceCosts.serviceId, commission))
+    IO.pure(ServiceCommission(serviceCost.serviceId, commission))
   }
 
-  def totalCommission(results: List[AmountPerService]): Double = toCurrencyFormat(results.map(_.amount).sum)
+  def totalCommission(results: List[ServiceCommission]): Double = toCurrencyFormat(results.map(_.commission).sum)
 
-  def processRequest(request: ClientRequest)(implicit logger: Logger[IO]): IO[List[AmountPerService]] =
+  def processRequest(request: ClientRequest)(implicit logger: Logger[IO]): IO[List[ServiceCommission]] =
     request match {
       case req if req.serviceCosts.isEmpty =>
         logger.error("Services list cannot be empty") *> IO.pure(List.empty)
