@@ -4,6 +4,7 @@ import cats.effect.IO
 import cats.implicits.toTraverseOps
 import fs2.Stream
 import org.typelevel.log4cats.Logger
+import ice.finance.ValidationError.*
 
 object CommissionService:
   def calculateRate(amount: Double): Double = amount match
@@ -25,32 +26,27 @@ object CommissionService:
     IO.pure(ServiceCommission(serviceCost.serviceId, commission))
   }
 
-  def totalCommission(results: List[ServiceCommission]): Double = toCurrencyFormat(results.map(_.commission).sum)
+  def totalCommission(commissionsList: List[ServiceCommission]): Double = toCurrencyFormat(commissionsList.map(_.commission).sum)
 
-  // Validate a client request
-  private def validateRequest(request: ClientRequest)(implicit logger: Logger[IO]): IO[Boolean] =
+  private def validateRequest(request: ClientRequest): Either[ValidationError, Unit] =
     val amountIsInvalid = request.serviceCosts.exists(sc => sc.amount > 1000000 || sc.amount < 0)
     val serviceIdIsInvalid = request.serviceCosts.exists(sc => sc.serviceId <= 0)
 
     request.serviceCosts match
-      case Nil => 
-        logger.error("Could not process the request: Services list cannot be empty") *>
-        IO.pure(false)
-      case _ if amountIsInvalid =>
-        logger.error(s"Could not process request: Amount per service must be between 0 and 1 000 000") *>
-        IO.pure(false)
-      case _ if serviceIdIsInvalid =>
-        logger.error(s"Could not process request: Service ID must be a positive integer") *>
-        IO.pure(false)
-      case _ =>
-        IO.pure(true)
+      case Nil => Left(EmptyServiceList)
+      case _ if amountIsInvalid => Left(InvalidAmount)
+      case _ if serviceIdIsInvalid => Left(InvalidServiceId)
+      case _ => Right(())
 
-  def processRequest(request: ClientRequest)(implicit logger: Logger[IO]): IO[List[ServiceCommission]] =
-    validateRequest(request).flatMap {
-      case false => IO.pure(List.empty)
-      case true =>
-        val result = request.serviceCosts.traverse(calculateCommission)
-        logger.info(s"Successfully processed request from client ${request.clientId}") *>
-        result
-    }
+  def processRequest(request: ClientRequest)(implicit logger: Logger[IO]): IO[Either[ValidationError, List[ServiceCommission]]] =
+    validateRequest(request) match
+      case Left(error) => 
+        logger.error(s"Validation error: ${error.message}") *> 
+          IO.pure(Left(error))
+      case Right(_) =>
+        request.serviceCosts.traverse(calculateCommission).flatMap { commissions =>
+          val total = totalCommission(commissions)
+          logger.info(s"Successfully processed request from client ${request.clientId}, total commission: $total")
+          .as(Right(commissions))
+        }
 end CommissionService

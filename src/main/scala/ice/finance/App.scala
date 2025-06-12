@@ -11,23 +11,31 @@ import org.typelevel.log4cats.Logger
 import org.typelevel.log4cats.slf4j.Slf4jLogger
 import scala.concurrent.duration.*
 import ice.finance.CommissionService.*
+import org.http4s.MessageFailure
 
 object App extends IOApp.Simple:
   implicit val logger: Logger[IO] = Slf4jLogger.getLogger[IO]
 
   val commissionEndpoints: HttpRoutes[IO] = {
     HttpRoutes.of[IO] {
-      
-      // case GET -> Root / "commissions" =>
 
       case req @ POST -> Root / "commissions" =>
-        for {
-          clientRequest <- req.as[ClientRequest]
-          clientId      = clientRequest.clientId
-          _             <-  logger.info(s"Received a request from client $clientId")
-          results       <- CommissionService.processRequest(clientRequest)
-          response      <- Ok(results)
-        } yield response
+        req.as[ClientRequest].flatMap { clientReq =>
+          logger.info(s"Received a request from client ${clientReq.clientId}") *>
+            CommissionService.processRequest(clientReq).flatMap {
+              case Right(results) => 
+                Ok(results)
+              case Left(error) => 
+                BadRequest(error)
+      }
+        }.handleErrorWith {
+          case e: MessageFailure =>
+            logger.error(s"Failed to parse client request: ${e.getMessage}") *>
+              BadRequest("Invalid request - please check your request conforms to the format expected by the API")
+          case e =>
+            logger.error(s"Some weirdness happening: ${e.getMessage}") *>
+              InternalServerError("An unexpected error occurred")
+        }
     }
   }
 
@@ -48,13 +56,14 @@ object App extends IOApp.Simple:
     EmberServerBuilder
       .default[IO]
       .withHttpApp(router)
+      .withShutdownTimeout(1.second)
       .build
   }
 
   override def run: IO[Unit] = {
     for {
       _ <- logger.info("Starting ICE Commission Calculation API")
-      _ <- createServer(logger).use(_ => logger.info("Server is up and running") *> IO.never)
+      _ <- createServer(logger).use(_ => logger.info("Server is up and running") >> IO.never)
     } yield ()
   }
 

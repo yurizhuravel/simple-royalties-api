@@ -49,7 +49,7 @@ the commissions will be:
 - (2) 100
 - (3) 40
 
-`TODO Assumption: we need to persist it or notify someone or do something. Out of scope for this task, so just logging it out in the solution`
+`TODO Assumption: we need to persist it or notify someone or do something. Out of scope for this task, so just logging the client ID and total commissions amount in this MVP solution`
 </details>
 
 -----------
@@ -66,17 +66,21 @@ on the amount spent. The commission is calculated at the following rates:
 | 3 000 - 1 000 000 | 1%   |
 
 
-The service is built and run with `sbt`, which you can get [here](https://www.scala-sbt.org/). Once installed, start the service with 
+The service is built and run with `sbt`, which you can get [here](https://www.scala-sbt.org/). Once installed, test the service with 
+
+`sbt test`
+
+or run the service with 
 
 `sbt run`
 
-As this is a sample service, it doesn't do any environment checks on launch, and the base url is hardcoded to `localhost:8080` in `Server.scala`
+As this is a sample service, it doesn't have a config and doesn't do any environment checks on launch - the base url is `localhost:8080`
 
 TODO for production: env check, base url resolution via `application.conf`
 
 ## Endpoints
 
-`/api/health` - health check. Method: `GET`
+`/health` - health check. Method: `GET`
 
 `/api/commissions` - the main endpoint. Method: `POST`, request body must contain JSON in the following format:
 
@@ -102,10 +106,10 @@ TODO for production: env check, base url resolution via `application.conf`
 
 where
 
-  - `clientID`  is a unique client identifier
+  - `clientID`  is a unique client identifier, a string in free format.
   - `serviceCosts` must be a non-empty list of objects each containing:
-    - `serviceID` an integer identifier of a relevant service provided
-    - `amount` a monetary amount payable for this service (an integer or Double rounded to two decimal positions)
+    - `serviceID` an identifier of a relevant service provided. Must be a positive integer.
+    - `amount` a monetary amount payable for this service (a positive integer or Double, which will be rounded by this service to two decimal positions before processing). Must not exceed 1 000 000.
 
 Expected response for the sample JSON would be:
 
@@ -125,6 +129,8 @@ Expected response for the sample JSON would be:
   }
 ]
 ```
+
+For MVP purposes, the server does not handle the result in any meaningful way, i.e. persisting to a DB or notifying downstream. The `clientID` and the total amount of commissions payable to that client, however, are logged.
 
 To test the API locally, you can use your favourite HTTP client with JSON in the body as described above, or try a `curl` request:
 

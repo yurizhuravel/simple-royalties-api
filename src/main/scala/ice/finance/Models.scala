@@ -1,6 +1,6 @@
 package ice.finance
 
-import io.circe.{Decoder, Encoder}
+import io.circe.{Decoder, Encoder, Json}
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
 
 trait AmountPerService
@@ -22,3 +22,13 @@ case class ClientRequest(clientId: String, serviceCosts: List[ServiceCost])
 object ClientRequest:
   implicit val clientRequestEncoder: Encoder[ClientRequest] = deriveEncoder
   implicit val clientRequestDecoder: Decoder[ClientRequest] = deriveDecoder
+
+enum ValidationError(val message: String):
+  case EmptyServiceList extends ValidationError("Services list cannot be empty")
+  case InvalidAmount extends ValidationError("Amount per service must be between 0 and 1,000,000")
+  case InvalidServiceId extends ValidationError("Service ID must be a positive integer")
+
+object ValidationError:
+  implicit val validationErrorEncoder: Encoder[ValidationError] = Encoder.instance { error =>
+    Json.obj("error" -> Json.fromString(error.message))
+  }
