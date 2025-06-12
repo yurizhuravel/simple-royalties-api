@@ -1,18 +1,18 @@
 package ice.finance
 
 import cats.effect.IO
+import cats.implicits.toTraverseOps
 import fs2.Stream
 import org.typelevel.log4cats.Logger
 
 object CommissionService:
-  // Calculate commission rate based on amount
-  private def calculateRate(amount: Double): Double =
-    if amount <= 1000 then 0.1
-    else if amount <= 3000 then 0.05
-    else 0.01
+  def calculateRate(amount: Double): Double = amount match
+    case a if a < 1000 => 0.1
+    case a if a < 3000 => 0.05
+    case _ => 0.01
 
   // Truncate to two decimal places because it's currency
-  private def toCurrencyFormat(d: Double): Double =
+  def toCurrencyFormat(d: Double): Double =
     BigDecimal(d)
       .setScale(2, BigDecimal.RoundingMode.HALF_UP)
       .toDouble
@@ -27,23 +27,30 @@ object CommissionService:
 
   def totalCommission(results: List[ServiceCommission]): Double = toCurrencyFormat(results.map(_.commission).sum)
 
-  def processRequest(request: ClientRequest)(implicit logger: Logger[IO]): IO[List[ServiceCommission]] =
-    request match {
-      case req if req.serviceCosts.isEmpty =>
-        logger.error("Services list cannot be empty") *> IO.pure(List.empty)
+  // Validate a client request
+  private def validateRequest(request: ClientRequest)(implicit logger: Logger[IO]): IO[Boolean] =
+    val amountIsInvalid = request.serviceCosts.exists(sc => sc.amount > 1000000 || sc.amount < 0)
+    val serviceIdIsInvalid = request.serviceCosts.exists(sc => sc.serviceId <= 0)
 
-      case req if req.serviceCosts.exists(s => s.amount > 1000000 || s.amount < 0) =>
-        logger.error("Amount per service must be between 0 and 1 000 000") *> IO.pure(List.empty)
-
-      case req if req.serviceCosts.exists(s => s.serviceId <= 0) =>
-        logger.error("Service ID must be a positive integer") *> IO.pure(List.empty)
-
+    request.serviceCosts match
+      case Nil => 
+        logger.error("Could not process the request: Services list cannot be empty") *>
+        IO.pure(false)
+      case _ if amountIsInvalid =>
+        logger.error(s"Could not process request: Amount per service must be between 0 and 1 000 000") *>
+        IO.pure(false)
+      case _ if serviceIdIsInvalid =>
+        logger.error(s"Could not process request: Service ID must be a positive integer") *>
+        IO.pure(false)
       case _ =>
-        // Process in parallel
-        Stream.emits(request.serviceCosts)
-          .covary[IO]
-          .parEvalMap(4)(calculateCommission(_))
-          .compile
-          .toList
+        IO.pure(true)
+
+  def processRequest(request: ClientRequest)(implicit logger: Logger[IO]): IO[List[ServiceCommission]] =
+    validateRequest(request).flatMap {
+      case false => IO.pure(List.empty)
+      case true =>
+        val result = request.serviceCosts.traverse(calculateCommission)
+        logger.info(s"Successfully processed request from client ${request.clientId}") *>
+        result
     }
 end CommissionService

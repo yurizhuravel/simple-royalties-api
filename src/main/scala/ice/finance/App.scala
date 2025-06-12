@@ -23,9 +23,10 @@ object App extends IOApp.Simple:
       case req @ POST -> Root / "commissions" =>
         for {
           clientRequest <- req.as[ClientRequest]
-          results      <- CommissionService.processRequest(clientRequest)
-          _            <- logger.info(s"Successfully processed request from client ${clientRequest.clientId} for the total of ${totalCommission(results)}")
-          response     <- Ok(results)
+          clientId      = clientRequest.clientId
+          _             <-  logger.info(s"Received a request from client $clientId")
+          results       <- CommissionService.processRequest(clientRequest)
+          response      <- Ok(results)
         } yield response
     }
   }
@@ -47,7 +48,6 @@ object App extends IOApp.Simple:
     EmberServerBuilder
       .default[IO]
       .withHttpApp(router)
-      .withIdleTimeout(Duration(3, MINUTES))
       .build
   }
 

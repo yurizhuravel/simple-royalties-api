@@ -33,6 +33,8 @@ Given this commission
 | 1,000 - 3,000 | 5% |
 | 3,000 - 1,000,000 | 1% |
 
+`Assumption: upper bound is inclusive, lower bound is not`
+
 and this request:
 
 - (1) 900

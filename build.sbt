@@ -23,6 +23,7 @@ lazy val root = (project in file("."))
       // Circe for JSON handling
       "io.circe" %% "circe-core"    % circeVersion,
       "io.circe" %% "circe-generic" % circeVersion,
+      "io.circe" %% "circe-parser"  % circeVersion,
 
       // Logging
       "org.typelevel"       %% "log4cats-slf4j"  % "2.7.1",
