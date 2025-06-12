@@ -110,9 +110,9 @@ TODO for production: env check, base url resolution via `application.conf`
 
 where
 
-  - `clientID`  is a unique client identifier, a string in free format.
+  - `clientId`  is a unique client identifier, a string in free format.
   - `serviceCosts` must be a non-empty list of objects each containing:
-    - `serviceID` an identifier of a relevant service provided. Must be a positive integer.
+    - `serviceId` an identifier of a relevant service provided. Must be a positive integer.
     - `amount` a monetary amount payable for this service (a positive integer or Double, which will be rounded by this service to two decimal positions before processing). Must not exceed 1 000 000.
 
 Expected response for the sample JSON would be:
