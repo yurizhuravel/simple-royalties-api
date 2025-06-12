@@ -2,11 +2,10 @@ package ice.finance
 
 import cats.effect.IO
 import cats.implicits.toTraverseOps
-import fs2.Stream
 import org.typelevel.log4cats.Logger
 import ice.finance.ValidationError.*
 
-object CommissionService:
+object Handlers:
   def calculateRate(amount: Double): Double = amount match
     case a if a < 1000 => 0.1
     case a if a < 3000 => 0.05
@@ -49,4 +48,4 @@ object CommissionService:
           logger.info(s"Successfully processed request from client ${request.clientId}, total commission: $total")
           .as(Right(commissions))
         }
-end CommissionService
+end Handlers

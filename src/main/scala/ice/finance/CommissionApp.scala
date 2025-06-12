@@ -1,28 +1,26 @@
 package ice.finance
 
+import cats.data.Kleisli
 import cats.effect.{IO, IOApp, Resource}
-import cats.implicits.*
-import org.http4s.{Http, HttpRoutes}
+import org.http4s.{HttpRoutes, MessageFailure, Request, Response}
 import org.http4s.dsl.io.*
 import org.http4s.ember.server.EmberServerBuilder
-import org.http4s.server.{Server, Router}
-import org.http4s.circe.CirceEntityCodec._
+import org.http4s.server.{Router, Server}
+import org.http4s.circe.CirceEntityCodec.*
 import org.typelevel.log4cats.Logger
 import org.typelevel.log4cats.slf4j.Slf4jLogger
-import scala.concurrent.duration.*
-import ice.finance.CommissionService.*
-import org.http4s.MessageFailure
 
-object App extends IOApp.Simple:
+import scala.concurrent.duration.*
+
+object CommissionApp extends IOApp.Simple:
   implicit val logger: Logger[IO] = Slf4jLogger.getLogger[IO]
 
   val commissionEndpoints: HttpRoutes[IO] = {
     HttpRoutes.of[IO] {
-
       case req @ POST -> Root / "commissions" =>
         req.as[ClientRequest].flatMap { clientReq =>
           logger.info(s"Received a request from client ${clientReq.clientId}") *>
-            CommissionService.processRequest(clientReq).flatMap {
+            Handlers.processRequest(clientReq).flatMap {
               case Right(results) => 
                 Ok(results)
               case Left(error) => 
@@ -31,7 +29,7 @@ object App extends IOApp.Simple:
         }.handleErrorWith {
           case e: MessageFailure =>
             logger.error(s"Failed to parse client request: ${e.getMessage}") *>
-              BadRequest("Invalid request - please check your request conforms to the format expected by the API")
+              BadRequest("Invalid request - please check your request is not malformed and conforms to the format expected by the API")
           case e =>
             logger.error(s"Some weirdness happening: ${e.getMessage}") *>
               InternalServerError("An unexpected error occurred")
@@ -41,13 +39,12 @@ object App extends IOApp.Simple:
 
   val healthEndpoint: HttpRoutes[IO] = {
     HttpRoutes.of[IO] {
-
       case GET -> Root =>
         Ok("Service is healthy!")
     }
   }
 
-  val router = Router(
+  val router: Kleisli[IO, Request[IO], Response[IO]] = Router(
     "/api" -> commissionEndpoints,
     "/health" -> healthEndpoint
   ).orNotFound
@@ -67,4 +64,4 @@ object App extends IOApp.Simple:
     } yield ()
   }
 
-end App
+end CommissionApp
