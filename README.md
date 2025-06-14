@@ -49,9 +49,13 @@ the commissions will be:
 - (2) 100
 - (3) 40
 
-`TODO Assumption: we need to persist it or notify someone or do something. Out of scope for this task, so just logging the client ID and total commissions amount in this MVP solution`
+```Architecture assumptions:
+1. The API will mostly be used not by humans but by other services sending valid json in agreed format and expecting a similar response
+2. The QA or PROD build will be done automatically on a master push by some agent (Jenkins or similar) which knows how to check out Git repos and handle `sbt` commands. TODO: add webhooks or actions to trigger the CI, package as a Docker container or suchlike to streamline things a bit
+3. Service metrics collection and hadling is not needed for this MVP
+4. We would need to handle the result in a useful way (persist it, or notify some service or a queue etc). Out of scope for this task, so just logging the client ID and total commissions amount in this MVP solution
+```
 </details>
-
 -----------
 
 ## Design notes
@@ -134,7 +138,7 @@ Expected response for the sample JSON would be:
 ]
 ```
 
-For MVP purposes, the service does not handle the result in a way that could be used by other backend services, i.e. persisting to a DB or notifying downstream. The `clientID` and the total amount of commissions payable to that client, however, are logged to the server console.
+For MVP purposes, the service does not handle the result in a way that could be used by other backend services, i.e. persisting to a DB or notifying downstream. The `clientId` and the total amount of commissions payable to that client, however, are logged to the server console.
 
 To test the API locally, start the service and use your favourite HTTP client with JSON in the body as described above, or try a `curl` request in a separate terminal:
 
