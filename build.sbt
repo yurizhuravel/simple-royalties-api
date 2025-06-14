@@ -4,7 +4,7 @@ organizationName := "ICE"
 
 val fs2Version    = "3.12.0"
 val http4sVersion = "0.23.30"
-val circeVersion  = "0.14.13"
+val circeVersion  = "0.14.14"
 
 lazy val root = (project in file("."))
   .settings(
