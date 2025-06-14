@@ -4,7 +4,7 @@ organizationName := "ICE"
 
 val fs2Version    = "3.12.0"
 val http4sVersion = "0.23.30"
-val circeVersion  = "0.14.13"
+val circeVersion  = "0.14.14"
 
 lazy val root = (project in file("."))
   .settings(
@@ -26,11 +26,11 @@ lazy val root = (project in file("."))
       "io.circe" %% "circe-parser"  % circeVersion,
 
       // Logging
-      "org.typelevel"       %% "log4cats-slf4j"  % "2.7.1",
-      "ch.qos.logback"       % "logback-classic" % "1.5.18",
+      "org.typelevel" %% "log4cats-slf4j"  % "2.7.1",
+      "ch.qos.logback" % "logback-classic" % "1.5.18",
 
-      //Tests
-      "com.disneystreaming" %% "weaver-cats"     % "0.8.3" % Test
+      // Tests
+      "com.disneystreaming" %% "weaver-cats" % "0.8.3" % Test
     )
   )
 
