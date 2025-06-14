@@ -30,7 +30,7 @@ lazy val root = (project in file("."))
       "ch.qos.logback" % "logback-classic" % "1.5.18",
 
       // Tests
-      "com.disneystreaming" %% "weaver-cats" % "0.8.3" % Test
+      "com.disneystreaming" %% "weaver-cats" % "0.8.4" % Test
     )
   )
 
