@@ -157,7 +157,7 @@ For MVP purposes, the service does not handle the result in a way that could be 
 To test the API locally, start the service and use your favourite HTTP client with JSON in the body as described above, or try a `curl` request in a separate terminal:
 
 ```
-curl -X POST http://localhost:8080/api/commissions \
+curl -X POST http://0.0.0.0:8080/api/commissions \
 -H "Content-Type: application/json" \
 -d '{
 "clientId": "The Beatles",
