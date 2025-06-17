@@ -10,6 +10,7 @@ import org.typelevel.log4cats.Logger
 import org.typelevel.log4cats.slf4j.Slf4jLogger
 
 import scala.concurrent.duration.*
+import com.comcast.ip4s.{ipv4, port}
 
 object CommissionApp extends IOApp.Simple:
   implicit val logger: Logger[IO] = Slf4jLogger.getLogger[IO]
@@ -43,6 +44,8 @@ object CommissionApp extends IOApp.Simple:
     EmberServerBuilder
       .default[IO]
       .withHttpApp(router)
+      .withHost(ipv4"0.0.0.0")
+      .withPort(port"8080")
       .withShutdownTimeout(1.second)
       .build
 
