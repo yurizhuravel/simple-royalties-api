@@ -49,9 +49,13 @@ the commissions will be:
 - (2) 100
 - (3) 40
 
-`TODO Assumption: we need to persist it or notify someone or do something. Out of scope for this task, so just logging the client ID and total commissions amount in this MVP solution`
+### Architecture assumptions:
+1. The API will mostly be used not by humans but by other services sending valid json in agreed format and expecting a similar response
+2. The QA or PROD build will be done automatically on a master push by some agent (Jenkins or similar) which knows how to check out Git repos and handle `sbt` commands, or, alternatively, can run just Docker
+3. Service metrics collection is not needed for this MVP
+4. We would need to handle the result in a useful way (persist it, or notify some service or a queue etc). Out of scope for this task, so just logging the client ID and total commissions amount in this MVP solution
+5. This MVP was not specifically designed to handle big load. Can use more FS2 if this is needed
 </details>
-
 -----------
 
 ## Description
