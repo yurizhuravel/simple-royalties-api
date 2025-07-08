@@ -4,7 +4,7 @@ import weaver._
 import cats.syntax.all._
 
 object HandlersSpec extends FunSuite:
-  
+
   test("calculateRate should respect upper/lower bounds and return correct rates") {
     expect(Handlers.calculateRate(500) == 0.1) &&
     expect(Handlers.calculateRate(1000) == 0.05) &&

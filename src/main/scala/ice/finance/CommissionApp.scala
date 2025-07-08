@@ -16,27 +16,28 @@ object CommissionApp extends IOApp.Simple:
   implicit val logger: Logger[IO] = Slf4jLogger.getLogger[IO]
 
   val commissionEndpoints: HttpRoutes[IO] =
-    HttpRoutes.of[IO] {
-      case req @ POST -> Root / "commissions" =>
-        req.as[ClientRequest].flatMap { clientReq =>
+    HttpRoutes.of[IO] { case req @ POST -> Root / "commissions" =>
+      req
+        .as[ClientRequest]
+        .flatMap { clientReq =>
           logger.info(s"Received a request from client ${clientReq.clientId}") *>
             Handlers.processRequest(clientReq).flatMap {
-              case Right(results) => 
+              case Right(results) =>
                 Ok(results)
-              case Left(error) => 
+              case Left(error) =>
                 BadRequest(error)
             }
-        }.handleErrorWith(Handlers.handleClientRequestError(using logger))
+        }
+        .handleErrorWith(Handlers.handleClientRequestError(using logger))
     }
 
   val healthEndpoint: HttpRoutes[IO] =
-    HttpRoutes.of[IO] {
-      case GET -> Root =>
-        Ok("Service is healthy!")
+    HttpRoutes.of[IO] { case GET -> Root =>
+      Ok("Service is healthy!")
     }
 
   val router = Router(
-    "/api" -> commissionEndpoints,
+    "/api"    -> commissionEndpoints,
     "/health" -> healthEndpoint
   ).orNotFound
 
