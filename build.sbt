@@ -25,9 +25,15 @@ lazy val root = (project in file("."))
       "io.circe" %% "circe-generic" % circeVersion,
       "io.circe" %% "circe-parser"  % circeVersion,
 
+      // Skunk - Postgres DB
+      "org.tpolecat" %% "skunk-core" % "0.6.4",
+
       // Logging
       "org.typelevel" %% "log4cats-slf4j"  % "2.7.1",
       "ch.qos.logback" % "logback-classic" % "1.5.18",
+
+      // Config
+      "com.github.pureconfig" %% "pureconfig-core" % "0.17.9",
 
       // Tests
       "org.typelevel" %% "weaver-cats" % "0.9.1" % Test

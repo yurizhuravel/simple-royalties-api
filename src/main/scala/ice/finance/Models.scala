@@ -2,6 +2,8 @@ package ice.finance
 
 import io.circe.{Decoder, Encoder, Json}
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
+import pureconfig.ConfigReader
+import pureconfig.generic.derivation.default.*
 
 trait AmountPerService
 
@@ -22,6 +24,14 @@ case class ClientRequest(clientId: String, serviceCosts: List[ServiceCost])
 object ClientRequest:
   implicit val clientRequestEncoder: Encoder[ClientRequest] = deriveEncoder
   implicit val clientRequestDecoder: Decoder[ClientRequest] = deriveDecoder
+
+final case class Config (
+  host: String,
+  port: Int,
+  username: String,
+  password: String,
+  database: String
+) derives ConfigReader
 
 enum ValidationError(val message: String):
   case EmptyServiceList extends ValidationError("Services list cannot be empty")
