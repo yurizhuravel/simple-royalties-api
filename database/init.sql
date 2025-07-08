@@ -1,0 +1,5 @@
+CREATE TABLE IF NOT EXISTS users (
+  id VARCHAR PRIMARY KEY,
+  amount REAL NOT NULL,
+  commission REAL NOT NULL
+);
