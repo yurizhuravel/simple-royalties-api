@@ -12,7 +12,7 @@ object Handlers:
   def calculateRate(amount: Double): Double = amount match
     case a if a < 1000 => 0.1
     case a if a < 3000 => 0.05
-    case _ => 0.01
+    case _             => 0.01
 
   // Truncate to two decimal places because it's currency
   def toCurrencyFormat(d: Double): Double =
@@ -21,29 +21,33 @@ object Handlers:
       .toDouble
 
   // Calculate commission for a single service
-  private def calculateCommission(serviceCost: ServiceCost)(implicit logger: Logger[IO]): IO[ServiceCommission] = {
-    val amount = serviceCost.amount
+  private def calculateCommission(
+      serviceCost: ServiceCost
+  )(implicit logger: Logger[IO]): IO[ServiceCommission] = {
+    val amount     = serviceCost.amount
     val commission = toCurrencyFormat(amount * calculateRate(amount))
 
     IO.pure(ServiceCommission(serviceCost.serviceId, commission))
   }
 
-  def totalCommission(commissionsList: List[ServiceCommission]): Double = toCurrencyFormat(commissionsList.map(_.commission).sum)
-  
+  def totalCommission(commissionsList: List[ServiceCommission]): Double = toCurrencyFormat(
+    commissionsList.map(_.commission).sum
+  )
+
   private def validateRequest(request: ClientRequest): Either[ValidationError, Unit] =
-    val amountIsInvalid = request.serviceCosts.exists(sc => sc.amount > 1000000 || sc.amount < 0)
+    val amountIsInvalid    = request.serviceCosts.exists(sc => sc.amount > 1000000 || sc.amount < 0)
     val serviceIdIsInvalid = request.serviceCosts.exists(sc => sc.serviceId <= 0)
 
     request.serviceCosts match
-      case Nil => Left(EmptyServiceList)
-      case _ if amountIsInvalid => Left(InvalidAmount)
+      case Nil                     => Left(EmptyServiceList)
+      case _ if amountIsInvalid    => Left(InvalidAmount)
       case _ if serviceIdIsInvalid => Left(InvalidServiceId)
-      case _ => Right(())
+      case _                       => Right(())
 
   def processRequest(config: Config, request: ClientRequest)(implicit logger: Logger[IO]): IO[Either[ValidationError, List[ServiceCommission]]] =
     validateRequest(request) match
-      case Left(error) => 
-        logger.error(s"Validation error: ${error.message}") *> 
+      case Left(error) =>
+        logger.error(s"Validation error: ${error.message}") *>
           IO.pure(Left(error))
       case Right(_) =>
         for {

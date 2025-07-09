@@ -20,27 +20,26 @@ object CommissionApp extends IOApp:
   val config: Config = ConfigSource.default.at("db").loadOrThrow[Config]
 
   val commissionEndpoints: HttpRoutes[IO] =
-    HttpRoutes.of[IO] {
-      case req @ POST -> Root / "commissions" =>
-        req.as[ClientRequest].flatMap { clientReq =>
-          logger.info(s"Received a request from client ${clientReq.clientId}") *>
-            Handlers.processRequest(config, clientReq).flatMap {
-              case Right(results) => 
-                Ok(results)
-              case Left(error) => 
-                BadRequest(error)
-            }
-        }.handleErrorWith(Handlers.handleClientRequestError(using logger))
+    HttpRoutes.of[IO] { case req @ POST -> Root / "commissions" =>
+      req.as[ClientRequest].flatMap { clientReq =>
+        logger.info(s"Received a request from client ${clientReq.clientId}") *>
+          Handlers.processRequest(config, clientReq).flatMap {
+            case Right(results) => 
+              Ok(results)
+            case Left(error) =>
+              BadRequest(error)
+          }
+        }
+        .handleErrorWith(Handlers.handleClientRequestError(using logger))
     }
 
   val healthEndpoint: HttpRoutes[IO] =
-    HttpRoutes.of[IO] {
-      case GET -> Root =>
-        Ok("Service is healthy!")
+    HttpRoutes.of[IO] { case GET -> Root =>
+      Ok("Service is healthy!")
     }
 
   val router = Router(
-    "/api" -> commissionEndpoints,
+    "/api"    -> commissionEndpoints,
     "/health" -> healthEndpoint
   ).orNotFound
 

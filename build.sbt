@@ -36,7 +36,7 @@ lazy val root = (project in file("."))
       "com.github.pureconfig" %% "pureconfig-core" % "0.17.9",
 
       // Tests
-      "org.typelevel" %% "weaver-cats" % "0.9.1" % Test
+      "org.typelevel" %% "weaver-cats" % "0.9.2" % Test
     )
   )
 
