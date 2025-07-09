@@ -6,6 +6,7 @@ import org.typelevel.log4cats.Logger
 import org.http4s.dsl.io.*
 import org.http4s.{Response, MessageFailure}
 import ValidationError.*
+import ice.finance.Database.getSession
 
 object Handlers:
   def calculateRate(amount: Double): Double = amount match
@@ -43,32 +44,25 @@ object Handlers:
       case _ if serviceIdIsInvalid => Left(InvalidServiceId)
       case _                       => Right(())
 
-  def processRequest(request: ClientRequest)(implicit
-      logger: Logger[IO]
-  ): IO[Either[ValidationError, List[ServiceCommission]]] =
+  def processRequest(config: Config, request: ClientRequest)(implicit logger: Logger[IO]): IO[Either[ValidationError, List[ServiceCommission]]] =
     validateRequest(request) match
       case Left(error) =>
         logger.error(s"Validation error: ${error.message}") *>
           IO.pure(Left(error))
       case Right(_) =>
-        request.serviceCosts.traverse(calculateCommission).flatMap { commissions =>
-          val total = totalCommission(commissions)
-          logger
-            .info(
-              s"Successfully processed request from client ${request.clientId}, total commission: $total"
-            )
-            .as(Right(commissions))
-        }
-
-  def handleClientRequestError(using logger: Logger[IO])(error: Throwable): IO[Response[IO]] =
-    error match
-      case e: MessageFailure =>
-        logger.error(s"Failed to parse client request: ${e.getMessage}") *>
-          BadRequest(
-            "Invalid request - please check your request is not malformed and conforms to the format expected by the API"
-          )
-      case e =>
-        logger.error(s"Some weirdness happening: ${e.getMessage}") *>
-          InternalServerError("An unexpected error occurred")
+        for {
+          commissions <- request.serviceCosts.traverse(calculateCommission)
+          clientTotal = ClientCommission(request.clientId, totalCommission(commissions))
+          _ <- Database.updateCommission(config, clientTotal)
+          _ <- logger.info(s"Successfully processed request from client ${clientTotal.clientId}, total commission: ${clientTotal.commission}")
+        } yield Right(commissions)
+  
+  def handleClientRequestError(using logger: Logger[IO])(error: Throwable): IO[Response[IO]] = error match
+    case e: MessageFailure =>
+      logger.error(s"Failed to parse client request: ${e.getMessage}") *>
+        BadRequest("Invalid request - please check your request is not malformed and conforms to the format expected by the API")
+    case e =>
+      logger.error(s"Some weirdness happening: ${e.getMessage}") *>
+        InternalServerError("An unexpected error occurred")
 
 end Handlers

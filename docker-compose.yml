@@ -1,0 +1,13 @@
+services:
+  postgres:
+    restart: always
+    image: postgres:13.0-alpine
+    ports:
+      - "5434:5432"
+    environment:
+      - DEBUG=false
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=royalties
+    volumes:
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
