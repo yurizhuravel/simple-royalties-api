@@ -6,6 +6,7 @@ import org.typelevel.log4cats.Logger
 import org.http4s.dsl.io.*
 import org.http4s.{Response, MessageFailure}
 import ValidationError.*
+import ice.finance.Database.getSession
 
 object Handlers:
   def calculateRate(amount: Double): Double = amount match
@@ -28,7 +29,7 @@ object Handlers:
   }
 
   def totalCommission(commissionsList: List[ServiceCommission]): Double = toCurrencyFormat(commissionsList.map(_.commission).sum)
-
+  
   private def validateRequest(request: ClientRequest): Either[ValidationError, Unit] =
     val amountIsInvalid = request.serviceCosts.exists(sc => sc.amount > 1000000 || sc.amount < 0)
     val serviceIdIsInvalid = request.serviceCosts.exists(sc => sc.serviceId <= 0)
@@ -39,17 +40,18 @@ object Handlers:
       case _ if serviceIdIsInvalid => Left(InvalidServiceId)
       case _ => Right(())
 
-  def processRequest(request: ClientRequest)(implicit logger: Logger[IO]): IO[Either[ValidationError, List[ServiceCommission]]] =
+  def processRequest(config: Config, request: ClientRequest)(implicit logger: Logger[IO]): IO[Either[ValidationError, List[ServiceCommission]]] =
     validateRequest(request) match
       case Left(error) => 
         logger.error(s"Validation error: ${error.message}") *> 
           IO.pure(Left(error))
       case Right(_) =>
-        request.serviceCosts.traverse(calculateCommission).flatMap { commissions =>
-          val total = totalCommission(commissions)
-          logger.info(s"Successfully processed request from client ${request.clientId}, total commission: $total")
-          .as(Right(commissions))
-        }
+        for {
+          commissions <- request.serviceCosts.traverse(calculateCommission)
+          clientTotal = ClientCommission(request.clientId, totalCommission(commissions))
+          _ <- Database.updateCommission(config, clientTotal)
+          _ <- logger.info(s"Successfully processed request from client ${clientTotal.clientId}, total commission: ${clientTotal.commission}")
+        } yield Right(commissions)
   
   def handleClientRequestError(using logger: Logger[IO])(error: Throwable): IO[Response[IO]] = error match
     case e: MessageFailure =>

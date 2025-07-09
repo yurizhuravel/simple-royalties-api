@@ -1,5 +1,4 @@
-CREATE TABLE IF NOT EXISTS users (
-  id VARCHAR PRIMARY KEY,
-  amount REAL NOT NULL,
+CREATE TABLE IF NOT EXISTS commissions (
+  client_id VARCHAR PRIMARY KEY,
   commission REAL NOT NULL
 );

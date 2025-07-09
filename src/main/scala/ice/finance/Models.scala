@@ -25,6 +25,8 @@ object ClientRequest:
   implicit val clientRequestEncoder: Encoder[ClientRequest] = deriveEncoder
   implicit val clientRequestDecoder: Decoder[ClientRequest] = deriveDecoder
 
+case class ClientCommission(clientId: String, commission: Double)
+
 final case class Config (
   host: String,
   port: Int,
