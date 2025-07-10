@@ -11,7 +11,7 @@ lazy val root = (project in file("."))
     testFrameworks += new TestFramework("weaver.framework.CatsEffect"),
     libraryDependencies ++= List(
       "org.typelevel" %% "cats-core"   % "2.13.0",
-      "org.typelevel" %% "cats-effect" % "3.6.1",
+      "org.typelevel" %% "cats-effect" % "3.6.2",
       "co.fs2"        %% "fs2-core"    % fs2Version,
       "co.fs2"        %% "fs2-io"      % fs2Version,
 
