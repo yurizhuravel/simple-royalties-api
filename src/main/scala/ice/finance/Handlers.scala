@@ -44,7 +44,9 @@ object Handlers:
       case _ if serviceIdIsInvalid => Left(InvalidServiceId)
       case _                       => Right(())
 
-  def processRequest(config: Config, request: ClientRequest)(implicit logger: Logger[IO]): IO[Either[ValidationError, List[ServiceCommission]]] =
+  def processRequest(config: Config, request: ClientRequest)(implicit
+      logger: Logger[IO]
+  ): IO[Either[ValidationError, List[ServiceCommission]]] =
     validateRequest(request) match
       case Left(error) =>
         logger.error(s"Validation error: ${error.message}") *>
@@ -54,15 +56,20 @@ object Handlers:
           commissions <- request.serviceCosts.traverse(calculateCommission)
           clientTotal = ClientCommission(request.clientId, totalCommission(commissions))
           _ <- Database.updateCommission(config, clientTotal)
-          _ <- logger.info(s"Successfully processed request from client ${clientTotal.clientId}, total commission: ${clientTotal.commission}")
+          _ <- logger.info(
+            s"Successfully processed request from client ${clientTotal.clientId}, total commission: ${clientTotal.commission}"
+          )
         } yield Right(commissions)
-  
-  def handleClientRequestError(using logger: Logger[IO])(error: Throwable): IO[Response[IO]] = error match
-    case e: MessageFailure =>
-      logger.error(s"Failed to parse client request: ${e.getMessage}") *>
-        BadRequest("Invalid request - please check your request is not malformed and conforms to the format expected by the API")
-    case e =>
-      logger.error(s"Some weirdness happening: ${e.getMessage}") *>
-        InternalServerError("An unexpected error occurred")
+
+  def handleClientRequestError(using logger: Logger[IO])(error: Throwable): IO[Response[IO]] =
+    error match
+      case e: MessageFailure =>
+        logger.error(s"Failed to parse client request: ${e.getMessage}") *>
+          BadRequest(
+            "Invalid request - please check your request is not malformed and conforms to the format expected by the API"
+          )
+      case e =>
+        logger.error(s"Some weirdness happening: ${e.getMessage}") *>
+          InternalServerError("An unexpected error occurred")
 
 end Handlers
