@@ -18,21 +18,21 @@ import cats.implicits.toTraverseOps
 object Database:
   implicit val logger: Logger[IO] = Slf4jLogger.getLogger[IO]
 
-  def getSession[F[_] : Temporal : Trace : Network: Console](config: Config): Resource[F, Session[F]] = 
+  def getSession[F[_]: Temporal: Trace: Network: Console](config: Config): Resource[F, Session[F]] =
     Session.single(
       host = config.host,
       port = config.port,
       user = config.username,
       password = Some(config.password),
-      database = config.database,
+      database = config.database
     )
-  
-  val commissionCodec: Codec[ClientCommission] = 
-    (varchar, float8).tupled.imap {
-      case (clientId, commission) => ClientCommission(clientId, commission)
-      } {
-      case ClientCommission(clientId, commission) => (clientId, commission)
-      }
+
+  val commissionCodec: Codec[ClientCommission] =
+    (varchar, float8).tupled.imap { case (clientId, commission) =>
+      ClientCommission(clientId, commission)
+    } { case ClientCommission(clientId, commission) =>
+      (clientId, commission)
+    }
 
   def upsert[F[_]: Monad: Logger](session: Session[F], clientTotal: ClientCommission): F[Unit] =
     for {
@@ -43,7 +43,9 @@ object Database:
         DO UPDATE SET commission = commissions.commission + EXCLUDED.commission
         """.command)
       rowCount <- command.execute(clientTotal)
-      _ <- Logger[F].info(s"Adding total commission of ${clientTotal.commission} for client ${clientTotal.clientId} to the database")
+      _        <- Logger[F].info(
+        s"Adding total commission of ${clientTotal.commission} for client ${clientTotal.clientId} to the database"
+      )
     } yield ()
 
   def updateCommission[F[_]](config: Config, clientTotal: ClientCommission) =
