@@ -3,7 +3,7 @@ organization     := "ice.finance"
 organizationName := "ICE"
 
 val fs2Version    = "3.12.0"
-val http4sVersion = "0.23.30"
+val http4sVersion = "0.23.34"
 val circeVersion  = "0.14.14"
 
 lazy val root = (project in file("."))
