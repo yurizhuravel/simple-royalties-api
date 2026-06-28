@@ -30,7 +30,7 @@ lazy val root = (project in file("."))
 
       // Logging
       "org.typelevel" %% "log4cats-slf4j"  % "2.7.1",
-      "ch.qos.logback" % "logback-classic" % "1.5.18",
+      "ch.qos.logback" % "logback-classic" % "1.5.37",
 
       // Config
       "com.github.pureconfig" %% "pureconfig-core" % "0.17.9",
