@@ -27,12 +27,12 @@ object ClientRequest:
 
 case class ClientCommission(clientId: String, commission: Double)
 
-final case class Config (
-  host: String,
-  port: Int,
-  username: String,
-  password: String,
-  database: String
+final case class Config(
+    host: String,
+    port: Int,
+    username: String,
+    password: String,
+    database: String
 ) derives ConfigReader
 
 enum ValidationError(val message: String):
