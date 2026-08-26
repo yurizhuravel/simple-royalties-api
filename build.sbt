@@ -2,7 +2,7 @@ scalaVersion     := "3.3.6"
 organization     := "ice.finance"
 organizationName := "ICE"
 
-val fs2Version    = "3.12.0"
+val fs2Version    = "3.12.2"
 val http4sVersion = "0.23.30"
 val circeVersion  = "0.14.14"
 
