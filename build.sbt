@@ -1,4 +1,4 @@
-scalaVersion     := "3.3.6"
+scalaVersion     := "3.3.8"
 organization     := "ice.finance"
 organizationName := "ICE"
 
