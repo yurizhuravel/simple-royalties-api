@@ -33,7 +33,7 @@ lazy val root = (project in file("."))
       "ch.qos.logback" % "logback-classic" % "1.5.18",
 
       // Config
-      "com.github.pureconfig" %% "pureconfig-core" % "0.17.9",
+      "com.github.pureconfig" %% "pureconfig-core" % "0.17.10",
 
       // Tests
       "org.typelevel" %% "weaver-cats" % "0.9.2" % Test
