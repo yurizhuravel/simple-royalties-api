@@ -29,7 +29,7 @@ lazy val root = (project in file("."))
       "org.tpolecat" %% "skunk-core" % "0.6.4",
 
       // Logging
-      "org.typelevel" %% "log4cats-slf4j"  % "2.7.1",
+      "org.typelevel" %% "log4cats-slf4j"  % "2.8.0",
       "ch.qos.logback" % "logback-classic" % "1.5.18",
 
       // Config
